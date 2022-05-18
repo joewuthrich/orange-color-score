@@ -4,8 +4,12 @@ body {
   font-family: "Open Sans", sans-serif;
   margin-top: 20px !important;
   margin: 40px auto;
-  max-width: 720px;
+  /* width: min(80vw, 720px); */
   padding: 0 40px;
+  display: flex;
+  justify-content: center;
+  /* max-height: calc(100vh - 40px); */
+  /* overflow: hidden; */
 }
 
 h1 {
@@ -15,11 +19,21 @@ h1 {
   margin-top: 20px;
 }
 
+#left-box {
+  width: 50vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(100vh - 40px);
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+}
+
 #pastebox-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
-  flex: 1 1 auto;
 }
 
 #pastebox {
@@ -36,10 +50,13 @@ h1 {
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  max-width: 720px;
+  width: 50vw;
   flex: 1 1 auto;
   overflow-y: auto;
   overflow-x: hidden;
+  position: absolute;
+  right: 0;
+  /* max-height: calc(100vh - 40px); */
   /* max-height: 34vh; */
 }
 
@@ -64,7 +81,8 @@ h1 {
   display: -ms-flexbox;
   display: -webkit-flex;
   display: flex;
-  max-width: 90vw;
+  width: 90%;
+  max-height: 160px;
   flex: 1 1 auto;
   justify-content: center;
   align-items: center;

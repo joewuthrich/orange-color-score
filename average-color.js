@@ -1,7 +1,7 @@
 /**
  * An algorithm for determining how orange an image is.
  *
- * It takes the three most orange colors from the color palette, scores them and averages the score, compares it with the score
+ * It takes the two most orange colors from the color palette and one other color, averages the score, compares it with the score
  * of the dominant color and returns the best one.
  *
  * Credit to:
@@ -89,30 +89,32 @@ function CLIPBOARD_CLASS(canvas_id) {
       var score = 0;
       var topColorPalette = colorThief.getPalette(pastedImage, 20);
       var dominantColor = colorThief.getColor(pastedImage, 3);
-      console.log(dominantColor);
 
-      var scoreList = [];
-      for (var i = 0; i < topColorPalette.length; i++) {
-        var color = topColorPalette[i];
-        var score = getDeltaE(
-          IDEAL_LAB,
-          xyzToLab(rgbToXyz({ r: color[0], g: color[1], b: color[2] }))
-        );
-        scoreList.push({ index: i, score: score });
-      }
-
+      // THIS IS BAD AND SLOW!
       topColorPalette.sort((a, b) => {
-        return scoreList[a] > scoreList[b]
-          ? -1
-          : scoreList[a] == scoreList[b]
-          ? 0
-          : 1;
+        var aScore = getDeltaE(
+          IDEAL_LAB,
+          xyzToLab(rgbToXyz({ r: a[0], g: a[1], b: a[2] }))
+        );
+        var bScore = getDeltaE(
+          IDEAL_LAB,
+          xyzToLab(rgbToXyz({ r: b[0], g: b[1], b: b[2] }))
+        );
+        return aScore < bScore ? -1 : aScore == bScore ? 0 : 1;
       });
 
       var topThreePalette = [];
       topThreePalette.push(topColorPalette[0]);
       topThreePalette.push(topColorPalette[1]);
-      topThreePalette.push(topColorPalette[2]);
+
+      topColorPalette = colorThief.getPalette(pastedImage, 10);
+      topThreePalette.push(
+        topColorPalette[0] in topThreePalette
+          ? topColorPalette[1] in topThreePalette
+            ? topColorPalette[2]
+            : topColorPalette[1]
+          : topColorPalette[0]
+      );
 
       var i = 1;
       for (var color of topThreePalette) {

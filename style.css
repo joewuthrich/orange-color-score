@@ -4,7 +4,7 @@ body {
   font-family: "Open Sans", sans-serif;
   margin-top: 20px !important;
   margin: 40px auto;
-  /* width: min(80vw, 720px); */
+  width: min(80vw, 720px);
   padding: 0 40px;
   display: flex;
   justify-content: center;

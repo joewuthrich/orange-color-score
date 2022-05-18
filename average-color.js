@@ -1,7 +1,14 @@
-var CLIPBOARD = new CLIPBOARD_CLASS("pastebox", true);
+var CLIPBOARD = new CLIPBOARD_CLASS("pastebox");
 const IDEAL_LAB = xyzToLab(rgbToXyz({ r: 255, g: 145, b: 0 }));
 const WHITE_LAB = xyzToLab(rgbToXyz({ r: 255, g: 255, b: 255 }));
 const D65 = [95.047, 100, 108.883];
+const colorThief = new ColorThief();
+var maxParticleCount = 150; //set max confetti count
+var particleSpeed = 1; //set the particle animation speed
+var startConfetti; //call to start confetti animation
+var stopConfetti; //call to stop adding confetti
+var toggleConfetti; //call to start or stop the confetti animation depending on whether it's already running
+var removeConfetti; //call to stop the confetti animation and remove all confetti immediately
 
 /**
  * image pasting into canvas
@@ -9,7 +16,7 @@ const D65 = [95.047, 100, 108.883];
  * @param {string} canvas_id - canvas id
  * @param {boolean} autoresize - if canvas will be resized
  */
-function CLIPBOARD_CLASS(canvas_id, autoresize) {
+function CLIPBOARD_CLASS(canvas_id) {
   var _self = this;
   var canvas = document.getElementById(canvas_id);
   var ctx = document.getElementById(canvas_id).getContext("2d");
@@ -48,7 +55,7 @@ function CLIPBOARD_CLASS(canvas_id, autoresize) {
   };
 
   //draw pasted image to canvas
-  drawImage = function (source) {
+  const drawImage = function (source) {
     var element = document.createElement("div");
     element.className = "row";
     element.innerHTML =
@@ -70,7 +77,12 @@ function CLIPBOARD_CLASS(canvas_id, autoresize) {
 
       // ctx.clearRect(0, 0, canvas.width, canvas.height);
       // ctx.drawImage(pastedImage, 0, 0);
-      var rgb = getAverageColor(pastedImage);
+      var rgbArray = colorThief.getColor(pastedImage);
+      var rgb = {};
+      rgb.r = rgbArray[0];
+      rgb.g = rgbArray[1];
+      rgb.b = rgbArray[2];
+
       var hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
       var rgbStr = "rgb(" + rgb.r + ", " + rgb.g + ", " + rgb.b + ")";
 
@@ -170,14 +182,6 @@ function rgbToHsl(r, g, b) {
   return { h: h, s: s, l: l };
 }
 
-function handleImages(files) {
-  document.getElementById("images").innerHTML = "";
-
-  for (var i = 0; i < files.length; i++) {
-    addImage(files[i]);
-  }
-}
-
 function getColor(value) {
   //value from 0 to 1
   var hue = ((1 - value) * 120).toString(10);
@@ -255,71 +259,18 @@ function xyzToLab([x, y, z]) {
 }
 
 /**
- * Converts Lab color space to Luminance-Chroma-Hue color space.
- * http://www.brucelindbloom.com/index.html?Eqn_Lab_to_LCH.html
- * @param  {number[]}
- * @return {number[]}
- */
-function labToLch([l, a, b]) {
-  const c = Math.sqrt(a * a + b * b);
-  const h = abToHue(a, b);
-  return [l, c, h];
-}
-
-/**
- * Converts a and b of Lab color space to Hue of LCH color space.
- * https://stackoverflow.com/questions/53733379/conversion-of-cielab-to-cielchab-not-yielding-correct-result
- * @param  {number} a
- * @param  {number} b
- * @return {number}
- */
-function abToHue(a, b) {
-  if (a >= 0 && b === 0) {
-    return 0;
-  }
-  if (a < 0 && b === 0) {
-    return 180;
-  }
-  if (a === 0 && b > 0) {
-    return 90;
-  }
-  if (a === 0 && b < 0) {
-    return 270;
-  }
-  let xBias;
-  if (a > 0 && b > 0) {
-    xBias = 0;
-  } else if (a < 0) {
-    xBias = 180;
-  } else if (a > 0 && b < 0) {
-    xBias = 360;
-  }
-  return radiansToDegrees(Math.atan(b / a)) + xBias;
-}
-
-function radiansToDegrees(radians) {
-  return radians * (180 / Math.PI);
-}
-
-function degreesToRadians(degrees) {
-  return (degrees * Math.PI) / 180;
-}
-
-/**
  * Returns the dE94 value.
  * @method
  * @returns {number}
  */
-getDeltaE = function (x1, x2) {
+const getDeltaE = function (x1, x2) {
   var sqrt = Math.sqrt;
   var pow = Math.pow;
 
-  console.log(x2);
-
   return sqrt(
-    pow(this.calculateL(x1, x2), 2) +
-      pow(this.calculateA(x1, x2), 2) +
-      pow(this.calculateB(x1, x2), 2)
+    pow(calculateL(x1, x2), 2) +
+      pow(calculateA(x1, x2), 2) +
+      pow(calculateB(x1, x2), 2)
   );
 };
 
@@ -328,7 +279,7 @@ getDeltaE = function (x1, x2) {
  * @method
  * @returns {number}
  */
-calculateL = function (x1, x2) {
+const calculateL = function (x1, x2) {
   return (x1.L - x2.L) / 1;
 };
 
@@ -337,7 +288,7 @@ calculateL = function (x1, x2) {
  * @method
  * @returns {number}
  */
-calculateA = function (x1, x2) {
+const calculateA = function (x1, x2) {
   var sqrt = Math.sqrt;
   var pow = Math.pow;
 
@@ -357,7 +308,7 @@ calculateA = function (x1, x2) {
  * @method
  * @returns {number}
  */
-calculateB = function (x1, x2) {
+const calculateB = function (x1, x2) {
   var sqrt = Math.sqrt;
   var pow = Math.pow;
 
@@ -377,13 +328,6 @@ calculateB = function (x1, x2) {
 
   return hab / sh;
 };
-
-var maxParticleCount = 150; //set max confetti count
-var particleSpeed = 1; //set the particle animation speed
-var startConfetti; //call to start confetti animation
-var stopConfetti; //call to stop adding confetti
-var toggleConfetti; //call to start or stop the confetti animation depending on whether it's already running
-var removeConfetti; //call to stop the confetti animation and remove all confetti immediately
 
 (function () {
   startConfetti = startConfettiInner;

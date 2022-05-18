@@ -87,6 +87,8 @@ function CLIPBOARD_CLASS(canvas_id, autoresize) {
       element.querySelector(".rgb").textContent = rgbStr;
       element.querySelector(".score").textContent =
         "Score: " + Math.round((1 - percentage) * 100) + "%";
+      element.style.backgroundColor = getColor(percentage);
+      element.classList.add(Math.round((1 - percentage) * 100));
     };
     pastedImage.src = source;
     var img = element.querySelector("img");
@@ -94,53 +96,6 @@ function CLIPBOARD_CLASS(canvas_id, autoresize) {
     document.getElementById("image-wrapper").prepend(element);
   };
 }
-
-// function addImage(file) {
-//   var element = document.createElement("div");
-//   element.className = "row";
-//   element.innerHTML =
-//     '<div class="cell image">' +
-//     "  <img />" +
-//     "</div>" +
-//     '<div class="cell color">' +
-//     '  <div class="box"></div>' +
-//     "  <ul>" +
-//     '    <li class="rgb"></li>' +
-//     '    <li class="hex"></li>' +
-//     '    <li class="hsl"></li>' +
-//     "  </ul>" +
-//     "</div>";
-
-// var img = element.querySelector("img");
-// img.src = URL.createObjectURL(file);
-// img.onload = function () {
-//   var rgb = getAverageColor(img);
-//   var hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
-//   var rgbStr = "rgb(" + rgb.r + ", " + rgb.g + ", " + rgb.b + ")";
-//   var hexStr =
-//     "#" +
-//     ("0" + rgb.r.toString(16)).slice(-2) +
-//     ("0" + rgb.g.toString(16)).slice(-2) +
-//     ("0" + rgb.b.toString(16)).slice(-2);
-//   var hslStr =
-//     "hsl(" +
-//     Math.round(hsl.h * 360) +
-//     ", " +
-//     Math.round(hsl.s * 100) +
-//     "%, " +
-//     Math.round(hsl.l * 100) +
-//     "%)";
-
-//   var box = element.querySelector(".box");
-//   box.style.backgroundColor = rgbStr;
-
-//   element.querySelector(".rgb").textContent = rgbStr;
-//   element.querySelector(".hex").textContent = hexStr;
-//   element.querySelector(".hsl").textContent = hslStr;
-// };
-
-//   document.getElementById("images").appendChild(element);
-// }
 
 // Get the average color of an image
 function getAverageColor(img) {
@@ -213,25 +168,8 @@ function handleImages(files) {
   }
 }
 
-document.ondragover = function (event) {
-  event.preventDefault();
-  event.dataTransfer.dropEffect = "copy";
-};
-
-document.ondrop = function (event) {
-  event.preventDefault();
-  handleImages(event.dataTransfer.files);
-};
-
-// (function () {
-//   var upload = document.getElementById("upload");
-//   var target = document.getElementById("target");
-
-//   upload.onchange = function () {
-//     handleImages(this.files);
-//   };
-
-//   target.onclick = function () {
-//     upload.click();
-//   };
-// })();
+function getColor(value) {
+  //value from 0 to 1
+  var hue = ((1 - value) * 120).toString(10);
+  return ["hsl(", hue, ",50%,75%)"].join("");
+}

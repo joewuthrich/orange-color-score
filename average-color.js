@@ -66,11 +66,11 @@ function CLIPBOARD_CLASS(canvas_id, autoresize) {
 
     var pastedImage = new Image();
     pastedImage.onload = function () {
-      canvas.width = pastedImage.width;
-      canvas.height = pastedImage.height;
+      // canvas.width = pastedImage.width;
+      // canvas.height = pastedImage.height;
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(pastedImage, 0, 0);
+      // ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // ctx.drawImage(pastedImage, 0, 0);
       var rgb = getAverageColor(pastedImage);
       var hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
       var rgbStr = "rgb(" + rgb.r + ", " + rgb.g + ", " + rgb.b + ")";
@@ -86,7 +86,7 @@ function CLIPBOARD_CLASS(canvas_id, autoresize) {
 
       element.querySelector(".rgb").textContent = rgbStr;
       element.querySelector(".score").textContent =
-        Math.round((1 - percentage) * 100) + "%";
+        "Score: " + Math.round((1 - percentage) * 100) + "%";
     };
     pastedImage.src = source;
     var img = element.querySelector("img");

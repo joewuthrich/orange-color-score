@@ -15,26 +15,29 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
   </head>
   <body>
-    <h1>Orange Color Scorer</h1>
-    <p class="info">
-      A static JS page to find an image's orange score - how close it is on
-      average to the ideal orange color.
-    </p>
-    <p class="info" style="font-style: italic">
-      Copy an image, click the box below, and paste using control-c.
-    </p>
-    <!-- <div id="target">
+    <div id="locked-box">
+      <h1>Orange Color Scorer</h1>
+      <p class="info">
+        A static JS page to find an image's orange score - how close it is on
+        average to the ideal orange color.
+      </p>
+      <p class="info" style="font-style: italic">
+        Copy an image, click the box below, and paste using control-c.
+      </p>
+      <!-- <div id="target">
       Drop images here (or click to upload)
       <input type="file" id="upload" multiple />
     </div> -->
-    <div id="pastebox-wrapper">
-      <canvas
-        style="border: 1px solid grey"
-        id="pastebox"
-        width="300"
-        height="300"
-      ></canvas>
+      <div id="pastebox-wrapper">
+        <canvas
+          style="border: 1px solid grey"
+          id="pastebox"
+          width="300"
+          height="300"
+        ></canvas>
+      </div>
     </div>
+    <div id="locked-padding"></div>
     <div id="image-wrapper"></div>
 
     <script src="average-color.js"></script>

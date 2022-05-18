@@ -20,7 +20,8 @@ h1 {
 }
 
 #left-box {
-  width: 50vw;
+  width: calc(50vw - 20px);
+  padding-left: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -158,4 +159,24 @@ h1 {
 
 #upload {
   display: none;
+}
+
+#cover {
+  display: none;
+  background: rgb(255, 208, 179);
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  z-index: 2;
+}
+
+@media only screen and (max-width: 747px) {
+  #cover {
+    display: flex;
+  }
 }

@@ -96,7 +96,7 @@ function CLIPBOARD_CLASS(canvas_id, autoresize) {
 
       if (deltaE <= 40) {
         startConfetti();
-        setInterval(stopConfetti, 500);
+        setInterval(stopConfetti, 750);
       }
       // element.classList.add(Math.round((1 - percentage) * 100));
     };
@@ -379,7 +379,7 @@ calculateB = function (x1, x2) {
 };
 
 var maxParticleCount = 150; //set max confetti count
-var particleSpeed = 3; //set the particle animation speed
+var particleSpeed = 1; //set the particle animation speed
 var startConfetti; //call to start confetti animation
 var stopConfetti; //call to stop adding confetti
 var toggleConfetti; //call to start or stop the confetti animation depending on whether it's already running

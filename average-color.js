@@ -1,50 +1,148 @@
-function addImage(file) {
-  var element = document.createElement("div");
-  element.className = "row";
-  element.innerHTML =
-    '<div class="cell image">' +
-    "  <img />" +
-    "</div>" +
-    '<div class="cell color">' +
-    '  <div class="box"></div>' +
-    "  <ul>" +
-    '    <li class="rgb"></li>' +
-    '    <li class="hex"></li>' +
-    '    <li class="hsl"></li>' +
-    "  </ul>" +
-    "</div>";
+var CLIPBOARD = new CLIPBOARD_CLASS("pastebox", true);
 
-  var img = element.querySelector("img");
-  img.src = URL.createObjectURL(file);
-  img.onload = function () {
-    var rgb = getAverageColor(img);
-    var hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
-    var rgbStr = "rgb(" + rgb.r + ", " + rgb.g + ", " + rgb.b + ")";
-    var hexStr =
-      "#" +
-      ("0" + rgb.r.toString(16)).slice(-2) +
-      ("0" + rgb.g.toString(16)).slice(-2) +
-      ("0" + rgb.b.toString(16)).slice(-2);
-    var hslStr =
-      "hsl(" +
-      Math.round(hsl.h * 360) +
-      ", " +
-      Math.round(hsl.s * 100) +
-      "%, " +
-      Math.round(hsl.l * 100) +
-      "%)";
+var r = 255;
+var g = 145;
+var b = 0;
 
-    var box = element.querySelector(".box");
-    box.style.backgroundColor = rgbStr;
+/**
+ * image pasting into canvas
+ *
+ * @param {string} canvas_id - canvas id
+ * @param {boolean} autoresize - if canvas will be resized
+ */
+function CLIPBOARD_CLASS(canvas_id, autoresize) {
+  var _self = this;
+  var canvas = document.getElementById(canvas_id);
+  var ctx = document.getElementById(canvas_id).getContext("2d");
 
-    element.querySelector(".rgb").textContent = rgbStr;
-    element.querySelector(".hex").textContent = hexStr;
-    element.querySelector(".hsl").textContent = hslStr;
+  //handlers
+  document.addEventListener(
+    "paste",
+    function (e) {
+      _self.paste_auto(e);
+    },
+    false
+  );
+
+  //on paste
+  this.paste_auto = function (e) {
+    if (e.clipboardData) {
+      var items = e.clipboardData.items;
+      if (!items) return;
+
+      //access data directly
+      var is_image = false;
+      for (var i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf("image") !== -1) {
+          //image
+          var blob = items[i].getAsFile();
+          var URLObj = window.URL || window.webkitURL;
+          var source = URLObj.createObjectURL(blob);
+          drawImage(source);
+          is_image = true;
+        }
+      }
+      if (is_image == true) {
+        e.preventDefault();
+      }
+    }
   };
 
-  document.getElementById("images").appendChild(element);
+  //draw pasted image to canvas
+  drawImage = function (source) {
+    var element = document.createElement("div");
+    element.className = "row";
+    element.innerHTML =
+      '<div class="cell image">' +
+      "  <img />" +
+      "</div>" +
+      '<div class="cell color">' +
+      '  <div class="box"></div>' +
+      "  <ul>" +
+      '    <li class="rgb"></li>' +
+      '    <li class="score"></li>' +
+      "  </ul>" +
+      "</div>";
+
+    var pastedImage = new Image();
+    pastedImage.onload = function () {
+      canvas.width = pastedImage.width;
+      canvas.height = pastedImage.height;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(pastedImage, 0, 0);
+      var rgb = getAverageColor(pastedImage);
+      var hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+      var rgbStr = "rgb(" + rgb.r + ", " + rgb.g + ", " + rgb.b + ")";
+
+      var box = element.querySelector(".box");
+      box.style.backgroundColor = rgbStr;
+
+      var distance = Math.sqrt(
+        Math.pow(rgb.r - r, 2) + Math.pow(rgb.g - g, 2) + Math.pow(rgb.b - b, 2)
+      );
+
+      var percentage = distance / Math.sqrt(Math.pow(255, 2) * 3);
+
+      element.querySelector(".rgb").textContent = rgbStr;
+      element.querySelector(".score").textContent =
+        Math.round((1 - percentage) * 100) + "%";
+    };
+    pastedImage.src = source;
+    var img = element.querySelector("img");
+    img.src = source;
+    document.getElementById("image-wrapper").prepend(element);
+  };
 }
 
+// function addImage(file) {
+//   var element = document.createElement("div");
+//   element.className = "row";
+//   element.innerHTML =
+//     '<div class="cell image">' +
+//     "  <img />" +
+//     "</div>" +
+//     '<div class="cell color">' +
+//     '  <div class="box"></div>' +
+//     "  <ul>" +
+//     '    <li class="rgb"></li>' +
+//     '    <li class="hex"></li>' +
+//     '    <li class="hsl"></li>' +
+//     "  </ul>" +
+//     "</div>";
+
+// var img = element.querySelector("img");
+// img.src = URL.createObjectURL(file);
+// img.onload = function () {
+//   var rgb = getAverageColor(img);
+//   var hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+//   var rgbStr = "rgb(" + rgb.r + ", " + rgb.g + ", " + rgb.b + ")";
+//   var hexStr =
+//     "#" +
+//     ("0" + rgb.r.toString(16)).slice(-2) +
+//     ("0" + rgb.g.toString(16)).slice(-2) +
+//     ("0" + rgb.b.toString(16)).slice(-2);
+//   var hslStr =
+//     "hsl(" +
+//     Math.round(hsl.h * 360) +
+//     ", " +
+//     Math.round(hsl.s * 100) +
+//     "%, " +
+//     Math.round(hsl.l * 100) +
+//     "%)";
+
+//   var box = element.querySelector(".box");
+//   box.style.backgroundColor = rgbStr;
+
+//   element.querySelector(".rgb").textContent = rgbStr;
+//   element.querySelector(".hex").textContent = hexStr;
+//   element.querySelector(".hsl").textContent = hslStr;
+// };
+
+//   document.getElementById("images").appendChild(element);
+// }
+
+// Get the average color of an image
 function getAverageColor(img) {
   var canvas = document.createElement("canvas");
   var ctx = canvas.getContext("2d");
@@ -59,16 +157,19 @@ function getAverageColor(img) {
   var g = 0;
   var b = 0;
 
+  // Loop through all pixels
   for (var i = 0, l = data.length; i < l; i += 4) {
     r += data[i];
     g += data[i + 1];
     b += data[i + 2];
   }
 
+  // Get average pixel color
   r = Math.floor(r / (data.length / 4));
   g = Math.floor(g / (data.length / 4));
   b = Math.floor(b / (data.length / 4));
 
+  // Return colors
   return { r: r, g: g, b: b };
 }
 
@@ -122,15 +223,15 @@ document.ondrop = function (event) {
   handleImages(event.dataTransfer.files);
 };
 
-(function () {
-  var upload = document.getElementById("upload");
-  var target = document.getElementById("target");
+// (function () {
+//   var upload = document.getElementById("upload");
+//   var target = document.getElementById("target");
 
-  upload.onchange = function () {
-    handleImages(this.files);
-  };
+//   upload.onchange = function () {
+//     handleImages(this.files);
+//   };
 
-  target.onclick = function () {
-    upload.click();
-  };
-})();
+//   target.onclick = function () {
+//     upload.click();
+//   };
+// })();
